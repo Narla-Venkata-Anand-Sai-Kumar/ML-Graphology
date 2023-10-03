@@ -832,24 +832,9 @@ def start(file_name):
     # apply contour operation to straighten the contours which may be a single line or composed of multiple lines
     # the returned image is straightened version of the original image without filtration and binarization
     straightened = straighten(image)
-    # cv2.imshow('straightened',straightened)
-
-    # extract lines of handwritten text from the image using the horizontal projection
-    # it returns a 2D list of the vertical starting and ending index/pixel row location of each line in the handwriting
     lineIndices = extractLines(straightened)
-    # print lineIndices
-    # print
-
-    # extract words from each line using vertical projection
-    # it returns a 4D list of the vertical starting and ending indices and horizontal starting and ending indices (in that order) of each word in the handwriting
     wordCoordinates = extractWords(straightened, lineIndices)
 
-    # print wordCoordinates
-    # print len(wordCoordinates)
-    # for i, item in enumerate(wordCoordinates):
-    # cv2.imshow('item '+str(i), straightened[item[0]:item[1], item[2]:item[3]])
-
-    # extract average slant angle of all the words containing a long vertical stroke
     extractSlant(straightened, wordCoordinates)
 
     # cv2.waitKey(0)

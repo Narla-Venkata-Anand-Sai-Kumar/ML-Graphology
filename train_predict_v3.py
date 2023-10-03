@@ -5,7 +5,9 @@ from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import extract
+import extract_v3
 import categorize
+import ExtractFeature
 
 X_baseline_angle = []
 X_top_margin = []
@@ -187,8 +189,9 @@ if os.path.isfile("label_list"):
         if file_name == 'z':
             break
 
-        raw_features = extract.start(file_name)
 
+        raw_features = extract_v3.start(file_name)
+        # print(raw_features)
         raw_baseline_angle = raw_features[0]
         baseline_angle, comment = categorize.determine_baseline_angle(
             raw_baseline_angle)

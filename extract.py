@@ -88,13 +88,11 @@ def straighten(image):
     # dilate the handwritten lines in image with a suitable kernel for contour operation
     dilated = dilate(thresh, (5, 100))
     # cv2.imshow('dilated',dilated)
-
-    im2, ctrs, hier = cv2.findContours(
-        dilated.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    ctrs, hier = cv2.findContours(dilated.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     for i, ctr in enumerate(ctrs):
         x, y, w, h = cv2.boundingRect(ctr)
-
+        
         # We can be sure the contour is not a line if height > width or height is < 20 pixels. Here 20 is arbitrary.
         if h > w or h < MIN_HANDWRITING_HEIGHT_PIXEL:
             continue
@@ -104,8 +102,7 @@ def straighten(image):
         # rows, cols = ctr.shape[:2]
 
         # If the length of the line is less than one third of the document width, especially for the last line,
-        # ignore because it may yeild inacurate baseline angle which subsequently affects proceeding features.
-
+        # ignore because it may yield inaccurate baseline angle which subsequently affects proceeding features.
         if w < image.shape[1]/2:
             roi = 255
             image[y:y+h, x:x+w] = roi
@@ -130,43 +127,20 @@ def straighten(image):
         # image is overwritten with the straightened contour
         image[y:y+h, x:x+w] = extract
         '''
-		# Please Ignore. This is to draw visual representation of the contour rotation.
-		box = cv2.boxPoints(rect)
-		box = np.int0(box)
-		cv2.drawContours(display,[box],0,(0,0,255),1)
-		cv2.rectangle(display,(x,y),( x + w, y + h ),(0,255,0),1)
-		'''
+        # Please Ignore. This is to draw visual representation of the contour rotation.
+        box = cv2.boxPoints(rect)
+        box = np.int0(box)
+        cv2.drawContours(display,[box],0,(0,0,255),1)
+        cv2.rectangle(display,(x,y),( x + w, y + h ),(0,255,0),1)
+        '''
         # print angle
         angle_sum += angle
-        coutour_count += 1
-    '''	
-		# sum of all the angles of downward baseline
-		if(angle>0.0):
-			positive_angle_sum += angle
-			positive_count += 1
-		# sum of all the angles of upward baseline
-		else:
-			negative_angle_sum += angle
-			negative_count += 1
-			
-	if(positive_count == 0): positive_count = 1
-	if(negative_count == 0): negative_count = 1
-	average_positive_angle = positive_angle_sum / positive_count
-	average_negative_angle = negative_angle_sum / negative_count
-	print "average_positive_angle: "+str(average_positive_angle)
-	print "average_negative_angle: "+str(average_negative_angle)
-	
-	if(abs(average_positive_angle) > abs(average_negative_angle)):
-		average_angle = average_positive_angle
-	else:
-		average_angle = average_negative_angle
-	
-	print "average_angle: "+str(average_angle)
-	'''
-    # cv2.imshow('contours', display)
-
-    # mean angle of the contours (not lines) is found
-    mean_angle = angle_sum / contour_count
+        contour_count += 1  # Corrected line
+    print(contour_count)
+    if contour_count ==0:
+        mean_angle = 0
+    else:
+        mean_angle = angle_sum / contour_count  # Moved outside the loo
     BASELINE_ANGLE = mean_angle
     # print ("Average baseline angle: "+str(mean_angle))
     return image
@@ -527,7 +501,10 @@ def extractWords(image, lines):
     if (space_count == 0):
         space_count = 1
     average_word_spacing = float(space_columns) / space_count
-    relative_word_spacing = average_word_spacing / LETTER_SIZE
+    if LETTER_SIZE ==0:
+        relative_word_spacing = 0
+    else:
+        relative_word_spacing = average_word_spacing / LETTER_SIZE
     WORD_SPACING = relative_word_spacing
     # print "Average word spacing: "+str(average_word_spacing)
     # print ("Average word spacing relative to average letter size: "+str(relative_word_spacing))
@@ -707,8 +684,14 @@ def extractSlant(img, words):
         angle = -45
         result = " : Extremely left slanted"
     elif (max_index == 4):
-        p = s_function[4] / s_function[3]
-        q = s_function[4] / s_function[5]
+        if s_function[3]==0:
+            p=0
+        else:
+            p = s_function[4] / s_function[3]
+        if s_function[5]==0:
+            q=0
+        else:
+            q = s_function[4] / s_function[5]
         # print 'p='+str(p)+' q='+str(q)
         # the constants here are abritrary but I think suits the best
         if ((p <= 1.2 and q <= 1.2) or (p > 1.4 and q > 1.4)):
@@ -723,29 +706,29 @@ def extractSlant(img, words):
             result = " : Irregular slant behaviour"
 
         if angle == 0:
-            print "\n************************************************"
-            print "Slant determined to be straight."
+            print ("\n************************************************")
+            print ("Slant determined to be straight.")
         else:
-            print "\n************************************************"
-            print "Slant determined to be irregular."
+            print( "\n************************************************")
+            print ("Slant determined to be irregular.")
         cv2.imshow("Check Image", img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-        type = raw_input("Press enter if okay, else enter c to change: ")
+        type = input("Press enter if okay, else enter c to change: ")
         if type == 'c':
             if angle == 0:
                 angle = 180
                 result = " : Irregular Slant"
-                print "Set as"+result
-                print "************************************************\n"
+                print ("Set as"+result)
+                print( "************************************************\n")
             else:
                 angle = 0
                 result = " : Straight/No Slant"
-                print "Set as"+result
-                print "************************************************\n"
+                print ("Set as"+result)
+                print( "************************************************\n")
         else:
-            print "No Change!"
-            print "************************************************\n"
+            print ("No Change!")
+            print ("************************************************\n")
 
     SLANT_ANGLE = angle
     # print ("Slant angle(degree): "+str(SLANT_ANGLE)+result)
@@ -811,6 +794,7 @@ def start(file_name):
 
     # read image from disk
     image = cv2.imread('images/'+file_name)
+    image = cv2.resize(image,(850,850))
     # cv2.imshow(file_name,image)
 
     # Extract pen pressure. It's such a cool function name!

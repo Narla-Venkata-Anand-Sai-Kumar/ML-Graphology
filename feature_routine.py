@@ -43,7 +43,7 @@ elif os.path.isfile("raw_feature_list"):
             features.write("%s\t" % str(slant_angle))
             features.write("%s\t" % str(page_id))
             print>>features, ''
-    print "Done!"
+    print("Done!")
 
 else:
     print("Error: raw_feature_list file not found.")

@@ -1,6 +1,4 @@
-# This file is not supposed to be here.
-# But we used this anyway for labeling! ¯\_(ツ)_/¯
-#
+
 
 import os
 
@@ -117,7 +115,7 @@ elif os.path.isfile("feature_list"):
                 trait_3), str(trait_4), str(trait_5), str(trait_6), str(trait_7), str(trait_8)))
             labels.write("%s" % str(page_id))
             print>>labels, ''
-    print "Done!"
+    print("Done!")
 
 else:
     print("Error: feature_list file not found.")
