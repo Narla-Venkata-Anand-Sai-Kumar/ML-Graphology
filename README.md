@@ -6,7 +6,7 @@ The "ML-Graphology" repository is dedicated to the exploration of machine learni
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/<username>/ML-Graphology.git](https://github.com/Narla-Venkata-Anand-Sai-Kumar/ML-Graphology.git
+   https://github.com/Narla-Venkata-Anand-Sai-Kumar/ML-Graphology.git
    ```
 
 2. Navigate to the project directory:
